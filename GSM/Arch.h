@@ -37,3 +37,7 @@ typedef struct
 
 extern void ComminicationTaskLoop(void);
 extern void StartArchTask(void);
+
+
+
+

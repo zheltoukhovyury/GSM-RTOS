@@ -101,5 +101,13 @@ void OTG_FS_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
+void HardFault_Handler(void)
+{
+  volatile int fault;
+  fault++;
+
+}
+
+
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

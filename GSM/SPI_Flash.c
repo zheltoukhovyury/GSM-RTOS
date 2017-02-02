@@ -17,16 +17,6 @@ void SPIFlash_Init(void)
   cmd = 0x00; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
   SPI_Flash_CS_Set(1);  
   ReadUniqueNumber();
-  
-  /*
-  uint8_t testArrayWrite[10]={0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F};
-  uint8_t testArrayRead[50]={0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11};
-  SPIFlash_EraseSector(0x00000000);
-
-  SPIFlash_WriteArray(0x00000000, testArrayWrite, 10);
-  SPIFlash_ReadArray(0x00000000, testArrayRead, 15);
-  SPIFlash_GetStatus();
-  */
 }
 
 
@@ -89,23 +79,27 @@ void SPIFlash_WaitWhileBusy(void)
   cmd = RDSR; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
   do{
     HAL_SPI_Receive(&hspi1, &readByte, 1, 1);
+    if(readByte & BUSY)
+    {
+      cmd = cmd;
+    
+    }
   }while(readByte & BUSY);
   SPI_Flash_CS_Set(1);
 }
 
 void SPIFlash_ReadArray(uint32_t address, uint8_t* data, uint16_t len)
 {
+  SPIFlash_WaitWhileBusy();
+  
   SPI_Flash_CS_Set(0);
   uint8_t cmd;
-  cmd = READ; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
-  cmd = ((uint8_t*)address)[2]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
-  cmd = ((uint8_t*)address)[1]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
-  cmd = ((uint8_t*)address)[0]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
-
-  while(len--)
-  {
-    HAL_SPI_Receive(&hspi1, data++, 1, 1);
-  }
+  cmd = READ_FAST; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
+  cmd = ((uint8_t*)&address)[2]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
+  cmd = ((uint8_t*)&address)[1]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
+  cmd = ((uint8_t*)&address)[0]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
+  cmd = 0x00; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
+  HAL_SPI_Receive(&hspi1, data, len, 200);
   SPI_Flash_CS_Set(1);
 }
 
@@ -115,15 +109,20 @@ void SPIFlash_WriteArray(uint32_t address, uint8_t* data, uint16_t len)
   uint16_t Len = len;
   uint32_t Address = address;
   
+  SPIFlash_WaitWhileBusy();
+  
+
+  
+  
   while(Len)
   {
     SPIFlash_SendCmd(WREN);
     SPI_Flash_CS_Set(0);
     uint8_t cmd;
     cmd = WRITE; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
-    cmd = ((uint8_t*)address)[2]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
-    cmd = ((uint8_t*)address)[1]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
-    cmd = ((uint8_t*)address)[0]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
+    cmd = ((uint8_t*)&Address)[2]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
+    cmd = ((uint8_t*)&Address)[1]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
+    cmd = ((uint8_t*)&Address)[0]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
     do
     {
       HAL_SPI_Transmit(&hspi1, data++, 1, 1);
@@ -132,8 +131,7 @@ void SPIFlash_WriteArray(uint32_t address, uint8_t* data, uint16_t len)
     } while(Len && (Address & SPI_FLASH_PAGE_MASK));
 
     SPI_Flash_CS_Set(1);
-    
-    SPIFlash_WaitWhileBusy();
+    SPIFlash_WaitWhileBusy();  
   }
 }
 
@@ -142,16 +140,14 @@ void SPIFlash_EraseSector(uint32_t address)
 {
   uint8_t cmd;
   
-  SPIFlash_SendCmd(WREN);
+  SPIFlash_WaitWhileBusy();
   
+  SPIFlash_SendCmd(WREN);
   SPI_Flash_CS_Set(0);
   cmd = ERASE_4K; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
-  cmd = ((uint8_t*)address)[2]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
-  cmd = ((uint8_t*)address)[1]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
-  cmd = ((uint8_t*)address)[0]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
+  cmd = ((uint8_t*)&address)[2]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
+  cmd = ((uint8_t*)&address)[1]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
+  cmd = ((uint8_t*)&address)[0]; HAL_SPI_Transmit(&hspi1, &cmd, 1, 1);
   SPI_Flash_CS_Set(1);
-
-  SPIFlash_WaitWhileBusy();
-
 }
 

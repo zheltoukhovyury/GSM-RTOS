@@ -52,6 +52,16 @@ void ProgrammingStop(void)
 }
 
 
+void SupportUtilLoop(void)
+{
+  ProgrammingBegin();
+  while(1)
+  {
+    ProgrammingMaschine();
+  }
+}
+
+
 void ProgrammingMaschine(void)
 {
   static unsigned char* RcvBuffer = NULL;
@@ -78,11 +88,7 @@ void ProgrammingMaschine(void)
         packetReceived = TRUE;
         dataInPacketLen = RcvBuffer[1];
         
-        unsigned char packet[10];
-        int len = CreatePacket(opcode, 0, NULL, packet);
-        int i;
-        for(i = 0; i < len; i++)
-          PutByte(Port, packet[i]);
+
       }
     }
   }
@@ -100,20 +106,7 @@ void ProgrammingMaschine(void)
       //RcvBuffer = malloc(150);
       RcvP = 0;
       RcvBuffer = ProgTestBuff;
-      SPIFlash_Init();
-      volatile uint8_t st = SPIFlash_GetStatus();
-      st = SPIFlash_GetStatus();
-      st= st;
-      st= st;
-      st= st;      
-      st = SPIFlash_SendCmd(0x90);
-      st= st;
-      st= st;
-      st= st;
-      st = SPIFlash_SendCmd(0x9F);
-      st= st;
-      st= st;
-      st= st;
+      
       ProgrammingMaschine_State = ProgrammingMaschine_State_Inited;
       break;
   //-----------------------------------
@@ -133,7 +126,11 @@ void ProgrammingMaschine(void)
       default:
       case 1:
       case 2:{
-
+        unsigned char packet[10];
+        int len = CreatePacket(opcode, 0, NULL, packet);
+        int i;
+        for(i = 0; i < len; i++)
+          PutByte(Port, packet[i]);
       break;}
       case 3:{
         uint32_t addr;
@@ -143,15 +140,29 @@ void ProgrammingMaschine(void)
         addr |= RcvBuffer[5];addr<<=8;
         addr |= RcvBuffer[6];
         
-        len = RcvBuffer[1] = 4;
+        len = RcvBuffer[1] - 4;
         
         if(addr == 0)
           SPIFlash_EraseSector(FlashAddress_XMLSettings);
-        SPIFlash_WriteArray(addr, &RcvBuffer[6], len);
+        SPIFlash_WriteArray(addr, &RcvBuffer[7], len);
         
-
+        unsigned char packet[10];
+        len = CreatePacket(opcode, 0, NULL, packet);
+        int i;
+        for(i = 0; i < len; i++)
+          PutByte(Port, packet[i]);
+        
       break;}
-      }
+      case 100:{
+        unsigned char *packet = malloc(200);
+        StartPacket(100, packet);
+        AddStrToPacket("opcode 100: curren State.");
+        int length = FinishPacket();
+        for(int i = 0; i < length; i++)
+          PutByte(Port, packet[i]);
+        free(packet);
+        break;}
+      } 
     }
     break;
   }
@@ -168,3 +179,37 @@ int CreatePacket(unsigned char Opcode, int dataLen, unsigned char* data, unsigne
   buffer[3 + dataLen] = 0xCC;
   return 4 + dataLen;
 }
+
+int dataInPacketLen;
+unsigned char* packetBuffer;
+
+void StartPacket(unsigned char Opcode, unsigned char * buff)
+{
+  dataInPacketLen = 0;
+  packetBuffer = buff;
+  packetBuffer[dataInPacketLen++] = 0x55;
+  packetBuffer[dataInPacketLen++] = 0x00; //Len
+  packetBuffer[dataInPacketLen++] = Opcode;
+}
+
+
+void AddStrToPacket(unsigned char* data)
+{
+  AddArrayToPacket(data, strlen(data));
+}
+
+
+void AddArrayToPacket(unsigned char* data, int len)
+{
+  for(int i= 0; i < len; i++)
+    packetBuffer[dataInPacketLen++] = data[i];
+}
+
+int FinishPacket()
+{
+  packetBuffer[1] = dataInPacketLen - 3; //Len
+  packetBuffer[dataInPacketLen++] = 0xCC;
+  return dataInPacketLen;
+}
+
+

@@ -979,7 +979,7 @@
         <debug>1</debug>
         <option>
           <name>GenRtcDebugHeap</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>GenRtcEnableBoundsChecking</name>
@@ -1039,7 +1039,7 @@
         </option>
         <option>
           <name>GenRtcEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>GenRtcCheckPtrsNonInstrFunc</name>
@@ -1122,6 +1122,12 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\GSM\VoiceCall.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\GSM\XMLParser.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\GSM\XMLParser.h</name>
         </file>
       </group>
       <file>

@@ -1,7 +1,7 @@
 #MicroXplorer Configuration settings - do not modify
 FREERTOS.FootprintOK=true
 FREERTOS.IPParameters=Tasks01,FootprintOK
-FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default;GSM_Task,0,1000,GSM_Task_Start,Default;ComPort_Task,0,128,ComPort_Task_Start,Default;OnwWireTask,0,128,OnwWireTask_Start,Default;ComminicationTa,0,128,ComminicationTask_Start,Default
+FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default;GSM_Task,0,1000,GSM_Task_Start,Default;ComPort_Task,0,128,ComPort_Task_Start,Default;OnwWireTask,0,128,OnwWireTask_Start,Default;ComminicationTa,0,128,ComminicationTask_Start,Default;SupportUtil_Tas,-3,128,SupportUtil_Start,Default
 File.Version=6
 IWDG.IPParameters=Prescaler
 IWDG.Prescaler=IWDG_PRESCALER_256
@@ -146,6 +146,7 @@ PA9.GPIO_Label=VBUS_FS
 PA9.GPIO_Mode=GPIO_MODE_INPUT
 PA9.GPIO_PuPd=GPIO_NOPULL
 PA9.Locked=true
+PA9.Mode=Activate_VBUS
 PA9.Signal=USB_OTG_FS_VBUS
 PB10.GPIOParameters=GPIO_Label,GPIO_Speed,GPIO_PuPd,GPIO_Mode
 PB10.GPIO_Label=CLK_IN [MP45DT02_CLK]
@@ -367,7 +368,8 @@ TIM1.Prescaler=84
 TIM1.TIM_MasterOutputTrigger=TIM_TRGO_UPDATE
 USB_DEVICE.CLASS_NAME-CDC_FS=CDC
 USB_DEVICE.CLASS_NAME_FS=CDC
-USB_DEVICE.IPParameters=VirtualMode-CDC_FS,VirtualModeFS,USBD_HandleTypeDef-CDC_FS,CLASS_NAME-CDC_FS,CLASS_NAME_FS
+USB_DEVICE.IPParameters=VirtualMode-CDC_FS,VirtualModeFS,USBD_HandleTypeDef-CDC_FS,CLASS_NAME-CDC_FS,CLASS_NAME_FS,PRODUCT_STRING_CDC_FS
+USB_DEVICE.PRODUCT_STRING_CDC_FS=Virtual ComPort Dev
 USB_DEVICE.USBD_HandleTypeDef-CDC_FS=hUsbDeviceFS
 USB_DEVICE.VirtualMode-CDC_FS=Cdc
 USB_DEVICE.VirtualModeFS=Cdc_FS

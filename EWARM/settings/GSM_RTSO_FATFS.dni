@@ -3,7 +3,7 @@ stlinkserialNo=4BBD654D
 stlinkfoundProbes=
 CStepIntDis=_ 0
 [DebugChecksum]
-Checksum=-687684359
+Checksum=1262933513
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -99,10 +99,7 @@ SumSortOrder=0
 [Disassemble mode]
 mode=0
 [Breakpoints2]
-Bp0=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\Src\usbd_cdc_if.c}.264.3" 0 0 1 "" 0 "" 0
-Bp1=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\Src\usbd_cdc_if.c}.155.3" 0 0 1 "" 0 "" 0
-Bp2=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\Src\freertos.c}.138.3" 0 0 1 "" 0 "" 0
-Count=3
+Count=0
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""

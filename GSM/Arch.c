@@ -8,7 +8,9 @@
 #include "Arch.h"
 #include "TcpIp.h"
 #include "VoiceCall.h"
-#include "programming.h"
+#include "XMLParser.h"
+#include "SPI_Flash.h"
+
 
 
 
@@ -19,13 +21,10 @@ void CallTask(void);
 
 void ComminicationTaskLoop(void)
 {
-  ProgrammingBegin();
-
   while(1)
   {
-    //ARCH_Task();
+    ARCH_Task();
     CallTask();
-    ProgrammingMaschine();
   }
 }
 
@@ -54,13 +53,17 @@ void CallTask(void)
 
 
 
-BOOL testFlag = FALSE;
 
 
 ArchState archState = ArchState_Init;//ArchState_NotInited;
 ArchAuthorizationState archAuthorizationState = ArchAuth_NotInited;
 TTcpSocket socket_Arch;
 TArchParamters archParam;
+TIniParser settingParser;
+
+
+unsigned char settingBuff[2000];
+
 
 volatile int AuthResult;
 
@@ -93,7 +96,53 @@ void ARCH_Task(void)
 		case ArchState_NotInited:		
 		
 		break;		
-		case ArchState_Init:
+    case ArchState_Init:{
+      unsigned char* XMlRaw;
+      uint32_t addr = 0;
+      //XMlRaw = malloc(100);
+      
+      XMlRaw = settingBuff;
+      
+      IniParserInit(&settingParser);
+      TIniParser_Parameter param;
+      while(1)
+      {
+        if(IniParserGetFreeSpace(&settingParser) > 100)
+        {
+          SPIFlash_ReadArray(addr, XMlRaw, 100); addr+=100;
+          for(int i = 0; i < 100; i++)
+          {
+            if(XMlRaw[i] == 0x00)
+              break;
+            IniParserPutByte(&settingParser, XMlRaw[i]);
+          }
+        }
+        param = IniParserGetNexParameter(&settingParser);
+        if(param.type == unknownType)
+          break;
+        
+        if(!strcmp(param.name, "ipAddr"))
+        {
+        
+        }
+        if(!strcmp(param.name, "dnsAddr"))
+        {
+        
+        }
+        else if(!strcmp(param.name, "port"))
+        {
+          
+        }
+        else if(!strcmp(param.name, "gsmNumber2"))
+        {
+          break;
+        }
+      }
+
+      IniParserDeinit(&settingParser);
+    
+
+      
 			archState = ArchState_Connecting;
 			archParam.RouterNumber = 555;
 			archParam.DevType = 5;
@@ -109,10 +158,11 @@ void ARCH_Task(void)
 			archParam.Verison[3] = 1;	
 			//memset(&archParam.SessionId[0], 0x00, sizeof(SessionId));
 
-		break;
+      
+      //free(XMlRaw);
+      break;}
+      
 		case ArchState_Connecting:
-
-			//OpenSocket("80.82.49.51", "2021", &socket_Arch, TRUE);
 			if(socket_Arch.state == TCPSocketState_Closed)
 			{
 				CloseSocket(&socket_Arch);
@@ -244,8 +294,7 @@ int ArchAuthorization(void)
 			unsigned char ServerAnswer[24];
 		
 		
-			testFlag = TRUE;
-		
+					
 			SendByte(archParam.DevType, &socket_Arch);
 			SendByte(archParam.DevSubType, &socket_Arch);
 			SendByte(archParam.RouterNumber>>8, &socket_Arch);
@@ -292,3 +341,11 @@ test = (int)ServerAnswer[0];
 	}
 
 }
+
+
+
+
+
+
+
+

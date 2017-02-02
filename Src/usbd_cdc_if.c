@@ -44,6 +44,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc_if.h"
 /* USER CODE BEGIN INCLUDE */
+
+#include "ComPort.h"
+
 /* USER CODE END INCLUDE */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -70,8 +73,8 @@
 /* USER CODE BEGIN PRIVATE_DEFINES */
 /* Define size for the receive and transmit buffer over CDC */
 /* It's up to user to redefine and/or remove those define */
-#define APP_RX_DATA_SIZE  4
-#define APP_TX_DATA_SIZE  4
+#define APP_RX_DATA_SIZE  64
+#define APP_TX_DATA_SIZE  64
 /* USER CODE END PRIVATE_DEFINES */
 /**
   * @}
@@ -263,6 +266,11 @@ static int8_t CDC_Receive_FS (uint8_t* Buf, uint32_t *Len)
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+  for(int i = 0; i < *Len; i++)
+  {
+    extern ComPortHandle COMPORT2;
+    PutByteToRxbuffer(&COMPORT2, Buf[i]);
+  }
   return (USBD_OK);
   /* USER CODE END 6 */ 
 }

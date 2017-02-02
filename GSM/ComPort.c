@@ -4,12 +4,15 @@
 #include "FreeRTOSConfig.h"
 #include <stdlib.h>
 #include "tick.h"
+#include "iwdg.h"
+
 
 #include "misc.h"
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_usart.h"
 #include "stm32f4xx_rcc.h"
+#include "usb_device.h"
 
 
 ComPortHandle COMPORT1 = {0, NULL};
@@ -18,6 +21,7 @@ unsigned char rxTestBuff[200];
 unsigned char txTestBuff[200];
 
 unsigned char rxTestBuff2[200];
+unsigned char txTestBuff2[200];
 
 
 
@@ -99,7 +103,7 @@ ComPortHandle* OpenPort(unsigned char PortNumber, UINT32 Baudrate)
     COMPORT2.TxQueueWrite = 0;
 
     COMPORT2.RxBuff = rxTestBuff2;
-    //COMPORT2.TxQueue = txTestBuff;
+    COMPORT2.TxQueue = txTestBuff2;
 
     return &COMPORT2;
   break;}
@@ -202,8 +206,6 @@ void ComPortCycle(void);
 
 void ComPort_Task_Loop(void)
 {
-  unsigned char c;
-
   while(1)
   {
     ComPortCycle();
@@ -224,6 +226,7 @@ volatile int index = 0;
 
 void ComPortCycle(void)
 {
+  HAL_IWDG_Refresh(&hiwdg);
   if(COMPORT1.PortNumber != 0)
   {
     unsigned char b;
@@ -239,12 +242,17 @@ void ComPortCycle(void)
     unsigned char b;
     while(GetByteForTx(&COMPORT2, (unsigned char *)&b))
     {
-      CDC_Transmit_FS(&b, 1);
+      uint8_t result;
+      do{
+        result = CDC_Transmit_FS(&b, 1);
+      }while(result == USBD_BUSY);
+
+      
     }
     volatile uint8_t res;// = CDC_Receive_FS(&b, 1);
     res=res;
     {
-      PutByteToRxbuffer(&COMPORT2, b);
+      //PutByteToRxbuffer(&COMPORT2, b);
     }
   }
   

@@ -51,6 +51,7 @@
 #include "../GSM/gsm.h"
 #include "../GSM/ComPort.h"
 #include "../GSM/Arch.h"
+#include "../GSM/programming.h"
 
 
 /* USER CODE END Includes */
@@ -61,6 +62,7 @@ osThreadId GSM_TaskHandle;
 osThreadId ComPort_TaskHandle;
 osThreadId OnwWireTaskHandle;
 osThreadId ComminicationTaHandle;
+osThreadId SupportUtil_TasHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -72,6 +74,7 @@ void GSM_Task_Start(void const * argument);
 void ComPort_Task_Start(void const * argument);
 void OnwWireTask_Start(void const * argument);
 void ComminicationTask_Start(void const * argument);
+void SupportUtil_Start(void const * argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -121,6 +124,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of ComminicationTa */
   osThreadDef(ComminicationTa, ComminicationTask_Start, osPriorityNormal, 0, 128);
   ComminicationTaHandle = osThreadCreate(osThread(ComminicationTa), NULL);
+
+  /* definition and creation of SupportUtil_Tas */
+  osThreadDef(SupportUtil_Tas, SupportUtil_Start, osPriorityNormal, 0, 128);
+  SupportUtil_TasHandle = osThreadCreate(osThread(SupportUtil_Tas), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -180,6 +187,15 @@ void ComminicationTask_Start(void const * argument)
   /* Infinite loop */
   ComminicationTaskLoop();
   /* USER CODE END ComminicationTask_Start */
+}
+
+/* SupportUtil_Start function */
+void SupportUtil_Start(void const * argument)
+{
+  /* USER CODE BEGIN SupportUtil_Start */
+  
+  SupportUtilLoop();
+  /* USER CODE END SupportUtil_Start */
 }
 
 /* USER CODE BEGIN Application */
